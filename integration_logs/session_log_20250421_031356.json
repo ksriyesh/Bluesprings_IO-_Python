@@ -1,0 +1,14 @@
+[
+  {
+    "timestamp": "2025-04-21T03:13:18.489503",
+    "user_query": "Tell me why the sky is blue?\"",
+    "subtasks": [
+      {
+        "tool": "general",
+        "query": "Tell me why the sky is blue?",
+        "response": "Here's why the sky is blue:\n\n\u2022 **Scattering**: When sunlight enters Earth's atmosphere, it encounters tiny molecules of gases like nitrogen and oxygen.\n\u2022 **Short wavelengths**: These molecules scatter shorter (blue) wavelengths of light more than longer (red) wavelengths.\n\u2022 **Blue dominance**: As a result, our eyes see the scattered blue light, making the sky appear blue.",
+        "model_used": "llama3-70b-8192"
+      }
+    ]
+  }
+]

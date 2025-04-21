@@ -10,8 +10,11 @@ def general_assistant(input: str) -> dict:
     Returns both response and model used.
     """
     prompt = f"""
-You are a professional assistant who always thinks step-by-step.
-Answer the following question thoroughly, with a logical explanation.
+You are a concise AI assistant.
+
+Answer the following question in **3–5 short bullet points**, with clarity and minimal verbosity.
+
+Avoid over-explaining. Think step-by-step, but keep it brief.
 
 Question: {input}
 """
