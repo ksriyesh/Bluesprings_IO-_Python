@@ -7,7 +7,6 @@ from tools.calculator_tool import calculator
 from tools.translation_tool import translate
 from tools.general_tool import general_assistant
 from nodes.splitter import split_and_classify
-from nodes.output_node import combine_and_format
 
 # --- Log Directory + Session Log ---
 SESSION_LOG = []
@@ -21,18 +20,18 @@ TOOL_FUNCTIONS = {
     "general": general_assistant,
 }
 
-# --- State schema for one sub-task ---
+# --- LangGraph state for one subtask ---
 class AgentState(TypedDict, total=False):
     tool: str
     query: str
     result: str
     final_output: str
 
-# --- Tool routing ---
+# --- Tool routing logic ---
 def route_task(state: AgentState) -> str:
     return state.get("tool", END)
 
-# --- Tool execution node ---
+# --- Tool execution wrapper ---
 def tool_node(tool_name: str):
     def run(state: AgentState) -> AgentState:
         output = TOOL_FUNCTIONS[tool_name].invoke(state["query"])
@@ -40,16 +39,16 @@ def tool_node(tool_name: str):
         return state
     return run
 
-# --- Output formatting node ---
+# --- Output formatter ---
 def output_node(state: AgentState) -> AgentState:
     tool = state.get("tool", "unknown")
     result_data = state.get("result", {})
-    
+
     if isinstance(result_data, dict):
         response = result_data.get("response", "No response")
     else:
         response = result_data
-    
+
     state["final_output"] = f"[{tool}] → {response}"
     return state
 
@@ -60,25 +59,35 @@ def log_full_session():
     with open(path, "w") as f:
         json.dump(SESSION_LOG, f, indent=2)
 
-# --- LangGraph build (single sub-task execution) ---
+# --- LangGraph: build single-query flow ---
 builder = StateGraph(AgentState)
 
+# Add tool and output nodes
 builder.add_node("calculator", tool_node("calculator"))
 builder.add_node("translator", tool_node("translator"))
 builder.add_node("general", tool_node("general"))
 builder.add_node("output", output_node)
 
-builder.set_entry_point("start")
+# Entrypoint node
 builder.add_node("start", lambda state: state)
-builder.add_conditional_edges("start", route_task)
+builder.set_entry_point("start")
 
+# Connect start → tools based on routing
+builder.add_conditional_edges("start", route_task, {
+    "calculator": "calculator",
+    "translator": "translator",
+    "general": "general"
+})
+
+# Connect tools → output
 builder.add_edge("calculator", "output")
 builder.add_edge("translator", "output")
 builder.add_edge("general", "output")
 
+# Compile LangGraph
 graph = builder.compile()
 
-# --- CLI loop with grouped session logging ---
+# --- CLI loop with per-query LangGraph flow ---
 if __name__ == "__main__":
     print("💬 Agentic AI CLI — type 'exit' to quit.\n")
 
@@ -105,10 +114,9 @@ if __name__ == "__main__":
             subquery = task["query"]
             state = {"tool": tool, "query": subquery}
 
-            # Invoke the tool via LangGraph
             result = graph.invoke(state)
 
-            # Safely extract tool result and model
+            # Safely extract result and model
             tool_result = result.get("result", {})
             response = tool_result.get("response", str(tool_result)) if isinstance(tool_result, dict) else str(tool_result)
             model_used = tool_result.get("model", "unknown") if isinstance(tool_result, dict) else "unknown"
