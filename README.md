@@ -18,21 +18,21 @@ This project implements an intelligent, multi-tool AI assistant using LangGraph 
 
 ## 📂 Project Structure
 
-.
-├── chatbot.py                     # Main CLI entry point (LangGraph flow)
+
+├── chatbot.py                    
 ├── tools/
-│   ├── calculator_tool.py         # Math tool using LLM
-│   ├── translation_tool.py        # English <-> German translation
-│   ├── general_tool.py            # Reasoning assistant
-│   └── utils.py                   # call_llm() with model fallback + cleanup
+│   ├── calculator_tool.py         
+│   ├── translation_tool.py       
+│   ├── general_tool.py           
+│   └── utils.py                  
 ├── nodes/
-│   ├── splitter.py                # Breaks input into subtasks with tool mapping
-│   └── output_node.py             # Combines final result
-├── integration_logs/              # Session logs (one JSON per run)
-├── .env                           # Store your GROQ_API_KEY
+│   ├── splitter.py               
+│   └── output_node.py             
+├── integration_logs/             
+├── .env                          
 └── README.md
 
----
+
 
 ## 🚀 How to Run
 
